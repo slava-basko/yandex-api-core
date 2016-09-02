@@ -17,6 +17,7 @@
         "php": ">=5.4"
     },
     "autoload": {
+        "files": ["src/functions_include.php"],
         "psr-4": {
             "Yandex\\": "src/"
         }
