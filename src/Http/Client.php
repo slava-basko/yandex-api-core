@@ -4,12 +4,11 @@
  * Date: 8/11/16
  */
 
-namespace Yandex\Api;
+namespace Yandex\Http;
 
 use Yandex\Action\ActionInterface;
 use Yandex\Action\DataActionInterface;
 use Yandex\ActionHandler\ActionHandlerInterface;
-use Yandex\Http\Response;
 
 final class Client
 {
@@ -27,6 +26,11 @@ final class Client
      * @var string
      */
     private $clientPassword;
+
+    /**
+     * @var array
+     */
+    private $responseHeaders = [];
 
     /**
      * [StatAction::class => StatActionHandler::class]
@@ -70,6 +74,7 @@ final class Client
     public function call(ActionInterface $action)
     {
         $options = [];
+        $options[CURLOPT_HEADERFUNCTION] = [$this, 'headerHandler'];
         $options[CURLOPT_CUSTOMREQUEST] = strtoupper((string) $action->getHttpMethod());
         $options[CURLOPT_TIMEOUT] = 30;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -83,7 +88,7 @@ final class Client
             $options[CURLOPT_POSTFIELDS] = (string)$action->getBody();
         }
 
-        $ch = curl_init($action->getUrl());
+        $ch = curl_init($this->apiUrl . $action->getUrl());
         curl_setopt_array($ch, $options);
         $rawResponse = curl_exec($ch);
 
@@ -93,16 +98,32 @@ final class Client
 
         $response = new Response(
             (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE),
-            curl_getinfo($ch, CURLINFO_HEADER_OUT),
+            $this->responseHeaders,
             $rawResponse
         );
 
         curl_close($ch);
+        $this->responseHeaders = [];
 
         /**
          * @var ActionHandlerInterface $actionHandler
          */
         $actionHandler = new $this->actionHandlerMap[get_class($action)]();
         return $actionHandler->handle($response);
+    }
+
+    /** @noinspection PhpUnusedPrivateMethodInspection
+     * @param $curl
+     * @param $header
+     * @return int
+     */
+    private function headerHandler(/** @noinspection PhpUnusedParameterInspection */$curl, $header)
+    {
+        $length = strlen($header);
+        $header = str_replace(["\r", "\n"], '', $header);
+        if (strpos($header, 'HTTP/') !== 0 and $pos = strpos($header, ':')) {
+            $this->responseHeaders[trim(substr($header, 0, $pos))] = trim(substr($header, $pos + 1));
+        }
+        return $length;
     }
 }
