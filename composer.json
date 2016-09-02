@@ -1,0 +1,24 @@
+{
+    "name": "slava-basko/yandex-api-core",
+    "description": "Core code for clients",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Slava Basko",
+            "email": "basko.slava@gmail.com"
+        }
+    ],
+    "keywords": [
+        "Yandex",
+        "core",
+        "API"
+    ],
+    "require": {
+        "php": ">=5.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "Yandex\\": "src/"
+        }
+    },
+}
