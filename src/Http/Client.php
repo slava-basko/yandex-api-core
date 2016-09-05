@@ -78,7 +78,7 @@ final class Client
         $options[CURLOPT_CUSTOMREQUEST] = strtoupper((string) $action->getHttpMethod());
         $options[CURLOPT_TIMEOUT] = 30;
         $options[CURLOPT_RETURNTRANSFER] = true;
-        $options[CURLOPT_FAILONERROR] = true;
+        $options[CURLOPT_FAILONERROR] = false;
         $options[CURLOPT_HTTPHEADER] = [
             'Authorization: OAuth ' . (string)$action->getToken()
         ];
