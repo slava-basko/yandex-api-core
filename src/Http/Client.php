@@ -10,7 +10,7 @@ use Yandex\Action\ActionInterface;
 use Yandex\Action\DataActionInterface;
 use Yandex\ActionHandler\ActionHandlerInterface;
 
-final class Client
+class Client
 {
     /**
      * @var string
@@ -37,7 +37,7 @@ final class Client
      *
      * @var array
      */
-    private $actionHandlerMap = [];
+    protected $actionHandlerMap = [];
 
     /**
      * Client constructor.
