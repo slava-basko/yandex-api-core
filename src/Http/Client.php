@@ -37,7 +37,12 @@ class Client
      *
      * @var array
      */
-    protected $actionHandlerMap = [];
+    private $actionHandlerMap = [];
+
+    /**
+     * @var array
+     */
+    private $headers = [];
 
     /**
      * Client constructor.
@@ -67,6 +72,15 @@ class Client
     }
 
     /**
+     * @param $header
+     * @param $value
+     */
+    public function addHeader($header, $value)
+    {
+        $this->headers[] = $header . ': ' . $value;
+    }
+
+    /**
      * @param ActionInterface $action
      * @return mixed
      * @throws \Exception
@@ -79,9 +93,9 @@ class Client
         $options[CURLOPT_TIMEOUT] = 30;
         $options[CURLOPT_RETURNTRANSFER] = true;
         $options[CURLOPT_FAILONERROR] = false;
-        $options[CURLOPT_HTTPHEADER] = [
+        $options[CURLOPT_HTTPHEADER] = array_merge([
             'Authorization: OAuth ' . (string)$action->getToken()
-        ];
+        ], $this->headers);
 
         if ($action instanceof DataActionInterface) {
             $options[CURLOPT_POST] = true;
