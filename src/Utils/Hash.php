@@ -14,7 +14,6 @@
 
 namespace Yandex\Utils;
 
-
 use ArrayAccess;
 use InvalidArgumentException;
 
