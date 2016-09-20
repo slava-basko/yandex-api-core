@@ -6,7 +6,7 @@
 
 namespace Yandex\Exception;
 
-class BadResponse extends YandexException
+class BadResponseException extends YandexException
 {
 
 }

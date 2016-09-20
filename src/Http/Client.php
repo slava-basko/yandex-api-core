@@ -9,6 +9,7 @@ namespace Yandex\Http;
 use Yandex\Action\ActionInterface;
 use Yandex\Action\DataActionInterface;
 use Yandex\ActionHandler\ActionHandlerInterface;
+use Yandex\Exception\UnsupportedActionException;
 
 class Client
 {
@@ -87,6 +88,11 @@ class Client
      */
     public function call(ActionInterface $action)
     {
+        $actionClass = get_class($action);
+        if (array_key_exists($actionClass, $this->actionHandlerMap) == false) {
+            throw new UnsupportedActionException('Action ' . $actionClass . ' not supported.');
+        }
+
         $options = [];
         $options[CURLOPT_HEADERFUNCTION] = [$this, 'headerHandler'];
         $options[CURLOPT_CUSTOMREQUEST] = strtoupper((string) $action->getHttpMethod());
@@ -122,7 +128,7 @@ class Client
         /**
          * @var ActionHandlerInterface $actionHandler
          */
-        $actionHandler = new $this->actionHandlerMap[get_class($action)]();
+        $actionHandler = new $this->actionHandlerMap[$actionClass]();
         return $actionHandler->handle($response);
     }
 
