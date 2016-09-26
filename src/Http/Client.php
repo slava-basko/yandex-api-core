@@ -11,7 +11,7 @@ use Yandex\Action\DataActionInterface;
 use Yandex\ActionHandler\ActionHandlerInterface;
 use Yandex\Exception\UnsupportedActionException;
 
-class Client
+class Client implements HttpClientInterface
 {
     /**
      * @var string
