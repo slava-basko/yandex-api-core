@@ -29,30 +29,26 @@ class Client implements HttpClientInterface
     private $clientPassword;
 
     /**
-     * @var array
-     */
-    private $responseHeaders = [];
-
-    /**
      * [StatAction::class => StatActionHandler::class]
      *
      * @var array
      */
     private $actionHandlerMap = [];
-
+    
     /**
-     * @var array
+     * @var CurlInterface
      */
-    private $headers = [];
+    private $curl;
 
     /**
      * Client constructor.
      * @param string $apiUrl
      * @param $clientId
      * @param $clientPassword
+     * @param CurlInterface $curl
      * @internal param string $apiKey
      */
-    public function __construct($apiUrl, $clientId, $clientPassword)
+    public function __construct($apiUrl, $clientId, $clientPassword, CurlInterface $curl)
     {
         if (filter_var($apiUrl, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException('Invalid URL given.');
@@ -61,6 +57,7 @@ class Client implements HttpClientInterface
         $this->apiUrl = $apiUrl;
         $this->clientId = $clientId;
         $this->clientPassword = $clientPassword;
+        $this->curl = $curl;
     }
 
     /**
@@ -78,7 +75,7 @@ class Client implements HttpClientInterface
      */
     public function addHeader($header, $value)
     {
-        $this->headers[] = $header . ': ' . $value;
+        $this->curl->addHeader($header, $value);
     }
 
     /**
@@ -94,56 +91,37 @@ class Client implements HttpClientInterface
         }
 
         $options = [];
-        $options[CURLOPT_HEADERFUNCTION] = [$this, 'headerHandler'];
         $options[CURLOPT_CUSTOMREQUEST] = strtoupper((string) $action->getHttpMethod());
         $options[CURLOPT_TIMEOUT] = 30;
         $options[CURLOPT_RETURNTRANSFER] = true;
         $options[CURLOPT_FAILONERROR] = false;
-        $options[CURLOPT_HTTPHEADER] = array_merge([
-            'Authorization: OAuth ' . (string)$action->getToken()
-        ], $this->headers);
 
         if ($action instanceof DataActionInterface) {
             $options[CURLOPT_POST] = true;
             $options[CURLOPT_POSTFIELDS] = (string)$action->getBody();
         }
-
-        $ch = curl_init($this->apiUrl . $action->getUrl());
-        curl_setopt_array($ch, $options);
-        $rawResponse = curl_exec($ch);
+        
+        $this->curl->init($this->apiUrl . $action->getUrl());
+        $this->curl->addHeader('Authorization', 'OAuth ' . (string)$action->getToken());
+        $this->curl->setOptions($options);
+        $rawResponse = $this->curl->exec();
 
         if ($rawResponse === false) {
-            throw new \Exception(curl_error($ch), curl_errno($ch));
+            throw new \Exception($this->curl->getError(), $this->curl->getErrorCode());
         }
 
         $response = new Response(
-            (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE),
-            $this->responseHeaders,
+            $this->curl->getStatusCode(),
+            $this->curl->getResponseHeaders(),
             $rawResponse
         );
 
-        curl_close($ch);
-        $this->responseHeaders = [];
+        $this->curl->close();
 
         /**
          * @var ActionHandlerInterface $actionHandler
          */
         $actionHandler = new $this->actionHandlerMap[$actionClass]();
         return $actionHandler->handle($response);
-    }
-
-    /** @noinspection PhpUnusedPrivateMethodInspection
-     * @param $curl
-     * @param $header
-     * @return int
-     */
-    private function headerHandler(/** @noinspection PhpUnusedParameterInspection */$curl, $header)
-    {
-        $length = strlen($header);
-        $header = str_replace(["\r", "\n"], '', $header);
-        if (strpos($header, 'HTTP/') !== 0 and $pos = strpos($header, ':')) {
-            $this->responseHeaders[trim(substr($header, 0, $pos))] = trim(substr($header, $pos + 1));
-        }
-        return $length;
     }
 }
