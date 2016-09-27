@@ -8,5 +8,8 @@ namespace Yandex\Action;
 
 interface DataActionInterface
 {
+    /**
+     * @return string
+     */
     public function getBody();
 }

@@ -8,7 +8,7 @@ namespace Yandex;
 
 use Yandex\Http\Response;
 use Yandex\Utils\Hash;
-use Yandex\Utils\SimpleXMLReader;
+use Yandex\Utils\Json;
 
 /**
  * @param $domainName
@@ -25,26 +25,14 @@ function isValidDomainName($domainName)
  * @param Response $response
  * @return string
  */
-function apiErrorToMessage(Response $response)
+function apiJsonErrorToMessage(Response $response)
 {
-    $reasonBody = '';
+    $errorMessage = '';
+    $responseData = Json::decode($response->getBody());
 
-    $reader = new SimpleXMLReader;
-    if ($reader->XML($response->getBody()) == false) {
-        throw new \InvalidArgumentException('Invalid XML.');
-    }
-    $reader->registerCallback('error', function ($reader) use (&$reasonBody) {
-        /**
-         * @var SimpleXMLReader $reader
-         */
-        $element = $reader->expandSimpleXml();
-        $attributes = (array)$element->attributes();
-        $reasonBody .= Hash::get($attributes, '@attributes.code', '');
-        $reasonBody .= ' : ';
-        $reasonBody .= (string)$element->message;
-    });
-    $reader->parse();
-    $reader->close();
+    $errorMessage .= Hash::get($responseData, 'error_code', '');
+    $errorMessage .= ' : ';
+    $errorMessage .= Hash::get($responseData, 'error_message', '');
 
-    return $reasonBody;
+    return $errorMessage;
 }
