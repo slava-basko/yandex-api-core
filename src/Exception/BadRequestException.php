@@ -8,5 +8,5 @@ namespace Yandex\Exception;
 
 class BadRequestException extends YandexException
 {
-
+    protected $code = 400;
 }

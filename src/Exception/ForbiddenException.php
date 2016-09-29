@@ -8,5 +8,5 @@ namespace Yandex\Exception;
 
 class ForbiddenException extends YandexException
 {
-
+    protected $code = 403;
 }

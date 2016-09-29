@@ -30,6 +30,10 @@ function apiJsonErrorToMessage(Response $response)
     $errorMessage = '';
     $responseData = Json::decode($response->getBody());
 
+    if (!is_array($responseData) or !($responseData instanceof \ArrayAccess)) {
+        $responseData = [];
+    }
+
     $errorMessage .= Hash::get($responseData, 'error_code', '');
     $errorMessage .= ' : ';
     $errorMessage .= Hash::get($responseData, 'error_message', '');

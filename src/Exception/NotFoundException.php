@@ -8,5 +8,5 @@ namespace Yandex\Exception;
 
 class NotFoundException extends YandexException
 {
-
+    protected $code = 404;
 }

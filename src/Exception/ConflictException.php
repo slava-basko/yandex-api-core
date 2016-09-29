@@ -8,5 +8,5 @@ namespace Yandex\Exception;
 
 class ConflictException extends YandexException
 {
-
+    protected $code = 409;
 }
