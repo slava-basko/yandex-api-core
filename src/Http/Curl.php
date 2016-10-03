@@ -47,7 +47,7 @@ class Curl implements CurlInterface
      */
     public function setOptions(array $options = [])
     {
-        $options = array_merge([
+        $options = array_replace([
             CURLOPT_HEADERFUNCTION => [$this, 'headerHandler'],
             CURLOPT_HTTPHEADER => $this->headers
         ], $options);
