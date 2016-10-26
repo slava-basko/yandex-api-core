@@ -6,6 +6,7 @@
 
 namespace Yandex;
 
+use Yandex\Exception\YandexException;
 use Yandex\Http\Response;
 use Yandex\Utils\Hash;
 use Yandex\Utils\Json;
@@ -39,4 +40,20 @@ function apiJsonErrorToMessage(Response $response)
     $errorMessage .= Hash::get($responseData, 'error_message', '');
 
     return $errorMessage;
+}
+
+/**
+ * @param array $exceptionsList
+ * @param Response $response
+ * @throws YandexException
+ */
+function throwExceptionByResponseCode(array $exceptionsList, Response $response)
+{
+    if (array_key_exists($response->getStatusCode(), $exceptionsList)) {
+        $exceptionClass = $exceptionsList[$response->getStatusCode()];
+        throw new $exceptionClass(\Yandex\apiJsonErrorToMessage($response));
+    }
+
+    $rawResponse = var_export($response, true);
+    throw new YandexException($rawResponse);
 }
