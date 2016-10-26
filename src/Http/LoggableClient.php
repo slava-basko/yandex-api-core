@@ -69,7 +69,7 @@ class LoggableClient extends ClientRoot implements HttpClientInterface
         try {
             $result = $this->client->call($action);
         } catch (\Exception $ex) {
-            $this->logger->debug('Exception while calling API', [
+            $this->logger->error('Exception while calling API', [
                 'exception_class' => get_class($ex),
                 'exception_code' => $ex->getCode(),
                 'exception_message' => $ex->getMessage(),
