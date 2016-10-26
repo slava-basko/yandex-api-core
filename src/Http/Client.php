@@ -11,30 +11,8 @@ use Yandex\Action\DataActionInterface;
 use Yandex\ActionHandler\ActionHandlerInterface;
 use Yandex\Exception\UnsupportedActionException;
 
-class Client implements HttpClientInterface
+class Client extends ClientRoot implements HttpClientInterface
 {
-    /**
-     * @var string
-     */
-    private $apiUrl;
-
-    /**
-     * @var string
-     */
-    private $clientId;
-
-    /**
-     * @var string
-     */
-    private $clientPassword;
-
-    /**
-     * [StatAction::class => StatActionHandler::class]
-     *
-     * @var array
-     */
-    private $actionHandlerMap = [];
-    
     /**
      * @var CurlInterface
      */
