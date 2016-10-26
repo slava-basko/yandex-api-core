@@ -61,6 +61,7 @@ class LoggableClient extends ClientRoot implements HttpClientInterface
     public function call(ActionInterface $action)
     {
         $this->logger->debug('Call yandex API', [
+            'action' => get_class($action),
             'url' => $this->client->apiUrl . $action->getUrl(),
             'client_id' => $this->client->clientId
         ]);
@@ -69,13 +70,18 @@ class LoggableClient extends ClientRoot implements HttpClientInterface
             $result = $this->client->call($action);
         } catch (\Exception $ex) {
             $this->logger->debug('Exception while calling API', [
-                'exception' => $ex
+                'exception_class' => get_class($ex),
+                'exception_code' => $ex->getCode(),
+                'exception_message' => $ex->getMessage(),
+                'exception_trace' => $ex->getTrace(),
+                'exception_file' => $ex->getFile(),
+                'exception_line' => $ex->getLine()
             ]);
             throw $ex;
         }
 
         $this->logger->debug('Call result', [
-            'result' => $result
+            'result' => var_export($result, true)
         ]);
 
         return $result;
