@@ -92,7 +92,9 @@ class Curl implements CurlInterface
      */
     public function addHeader($header, $value)
     {
-        $this->headers[] = $header . ': ' . $value;
+        if (!in_array($header . ': ' . $value, $this->headers)) {
+            $this->headers[] = $header . ': ' . $value;
+        }
     }
 
     /**
