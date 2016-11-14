@@ -73,7 +73,6 @@ class LoggableClient extends ClientRoot implements HttpClientInterface
                 'exception_class' => get_class($ex),
                 'exception_code' => $ex->getCode(),
                 'exception_message' => $ex->getMessage(),
-                'exception_trace' => $ex->getTrace(),
                 'exception_file' => $ex->getFile(),
                 'exception_line' => $ex->getLine()
             ]);
