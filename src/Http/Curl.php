@@ -39,6 +39,7 @@ class Curl implements CurlInterface
     {
         curl_close($this->ch);
         $this->ch = null;
+        $this->headers = [];
         $this->responseHeaders = [];
     }
 
@@ -49,7 +50,7 @@ class Curl implements CurlInterface
     {
         $options = array_replace([
             CURLOPT_HEADERFUNCTION => [$this, 'headerHandler'],
-            CURLOPT_HTTPHEADER => $this->headers
+            CURLOPT_HTTPHEADER => array_values($this->headers)
         ], $options);
         curl_setopt_array($this->ch, $options);
     }
@@ -92,9 +93,7 @@ class Curl implements CurlInterface
      */
     public function addHeader($header, $value)
     {
-        if (!in_array($header . ': ' . $value, $this->headers)) {
-            $this->headers[] = $header . ': ' . $value;
-        }
+        $this->headers[$header] = $header . ': ' . $value;
     }
 
     /**
